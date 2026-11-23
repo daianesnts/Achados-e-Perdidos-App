@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/splash_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://exmgtlgxmvfalukmgjjv.supabase.co',
+    anonKey: 'sb_publishable_yzZcv21UnmsSOrHvhD1cMg_NF8gIu-6',
+  );
+
   runApp(const AchadosPerdidosApp());
 }
 
@@ -16,7 +24,7 @@ class AchadosPerdidosApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E3A8A), 
+          seedColor: const Color(0xFF1E3A8A),
         ),
         scaffoldBackgroundColor: Colors.white,
       ),

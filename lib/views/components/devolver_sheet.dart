@@ -3,8 +3,8 @@ import '../../models/item_model.dart';
 
 class DevolverSheet extends StatefulWidget {
   final ItemModel item;
-  final Function({
-    required String itemId,
+  final Future<void> Function({
+    required int itemId,
     required String nomeRetirante,
     required String dataDevolucao,
   }) onConfirmar;
@@ -23,10 +23,14 @@ class _DevolverSheetState extends State<DevolverSheet> {
   final _nomeController = TextEditingController();
   final _dataController = TextEditingController();
 
+  DateTime? _dataEscolhida;
+  bool _confirmando = false;
+
   @override
   void initState() {
     super.initState();
     final hoje = DateTime.now();
+    _dataEscolhida = hoje;
     final dia = hoje.day.toString().padLeft(2, '0');
     final mes = hoje.month.toString().padLeft(2, '0');
     final ano = hoje.year.toString();
@@ -41,28 +45,28 @@ class _DevolverSheetState extends State<DevolverSheet> {
   }
 
   Future<void> _selecionarData() async {
-    final DateTime? dataEscolhida = await showDatePicker(
+    final DateTime? data = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _dataEscolhida ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
 
-    if (dataEscolhida != null) {
-      final dia = dataEscolhida.day.toString().padLeft(2, '0');
-      final mes = dataEscolhida.month.toString().padLeft(2, '0');
-      final ano = dataEscolhida.year.toString();
+    if (data != null) {
+      _dataEscolhida = data;
+      final dia = data.day.toString().padLeft(2, '0');
+      final mes = data.month.toString().padLeft(2, '0');
+      final ano = data.year.toString();
       setState(() {
         _dataController.text = '$dia/$mes/$ano';
       });
     }
   }
 
-  void _confirmarDevolucao() {
+  Future<void> _confirmarDevolucao() async {
     final nome = _nomeController.text.trim();
-    final data = _dataController.text.trim();
 
-    if (nome.isEmpty || data.isEmpty) {
+    if (nome.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Informe o nome de quem está retirando!'),
@@ -72,13 +76,51 @@ class _DevolverSheetState extends State<DevolverSheet> {
       return;
     }
 
-    widget.onConfirmar(
-      itemId: widget.item.id,
-      nomeRetirante: nome,
-      dataDevolucao: data,
-    );
+    if (widget.item.id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Item inválido (sem ID)!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-    Navigator.pop(context);
+    final data = _dataEscolhida ?? DateTime.now();
+    final ano = data.year.toString();
+    final mes = data.month.toString().padLeft(2, '0');
+    final dia = data.day.toString().padLeft(2, '0');
+    final dataParaBanco = '$ano-$mes-$dia';
+
+    setState(() {
+      _confirmando = true;
+    });
+
+    try {
+      await widget.onConfirmar(
+        itemId: widget.item.id!,
+        nomeRetirante: nome,
+        dataDevolucao: dataParaBanco,
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      debugPrint('Erro ao registrar devolução: $e');
+      if (mounted) {
+        setState(() {
+          _confirmando = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao registrar devolução: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -90,116 +132,95 @@ class _DevolverSheetState extends State<DevolverSheet> {
         left: 20,
         right: 20,
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Devolver item perdido',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.assignment_return_outlined,
+                  color: Color(0xFF1E3A8A)),
+              const SizedBox(width: 8),
+              Text(
+                'Devolver: ${widget.item.titulo}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+            ],
+          ),
+          const SizedBox(height: 16),
 
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+          const Text('Nome de quem está retirando',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _nomeController,
+            enabled: !_confirmando,
+            decoration: InputDecoration(
+              hintText: 'Ex.: Carlos Eduardo Santos',
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.image, size: 30, color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.item.titulo,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                        Text(
-                          '• ${widget.item.dataRegistro}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                        ),
-                        Text(
-                          '• ${widget.item.local}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                borderSide: BorderSide.none,
               ),
             ),
-            const SizedBox(height: 18),
+          ),
+          const SizedBox(height: 14),
 
-            const Text('Nome de quem está retirando', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _nomeController,
-              decoration: InputDecoration(
-                hintText: 'Ex.: Ana Julia Mesquita',
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
+          const Text('Data da Devolução',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _dataController,
+            readOnly: true,
+            enabled: !_confirmando,
+            onTap: _confirmando ? null : _selecionarData,
+            decoration: InputDecoration(
+              hintText: 'Ex.: 26/12/2026',
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              suffixIcon: const Icon(Icons.calendar_today_outlined),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
                 ),
               ),
+              onPressed: _confirmando ? null : _confirmarDevolucao,
+              child: _confirmando
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Text(
+                      'Confirmar Devolução',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
             ),
-            const SizedBox(height: 14),
-
-            const Text('Data', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _dataController,
-              readOnly: true,
-              onTap: _selecionarData,
-              decoration: InputDecoration(
-                hintText: 'Ex.: 03/11/2026',
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                suffixIcon: const Icon(Icons.calendar_today_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E3A8A),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: _confirmarDevolucao,
-                child: const Text(
-                  'Devolver',
-                  style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

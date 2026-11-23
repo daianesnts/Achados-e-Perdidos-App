@@ -30,7 +30,7 @@ class ItemCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Foto representativo do item
+              // Foto do item (com suporte a imagem do Supabase Storage)
               Container(
                 width: 75,
                 height: 75,
@@ -38,11 +38,36 @@ class ItemCard extends StatelessWidget {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.image,
-                  size: 38,
-                  color: Colors.grey.shade500,
-                ),
+                child: item.imagemUrl != null && item.imagemUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          item.imagemUrl!,
+                          width: 75,
+                          height: 75,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                            Icons.broken_image_outlined,
+                            size: 34,
+                            color: Colors.grey.shade400,
+                          ),
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Icon(
+                        Icons.image_outlined,
+                        size: 38,
+                        color: Colors.grey.shade500,
+                      ),
               ),
               const SizedBox(width: 14),
 
@@ -59,7 +84,7 @@ class ItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '• ${item.dataRegistro}',
+                      '• ${item.dataRegistroFormatada}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade700,
@@ -76,7 +101,7 @@ class ItemCard extends StatelessWidget {
                     if (item.foiDevolvido) ...[
                       const SizedBox(height: 2),
                       Text(
-                        '• ${item.dataDevolucao ?? ""}',
+                        '• ${item.dataDevolucaoFormatada ?? ""}',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade700,
@@ -108,24 +133,6 @@ class ItemCard extends StatelessWidget {
                   ),
                   onPressed: onBotaoAcao,
                   child: const Text('Devolver', style: TextStyle(fontSize: 13)),
-                )
-              else
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF90CAF9),
-                    foregroundColor: const Color(0xFF0D47A1),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                    minimumSize: Size.zero,
-                  ),
-                  onPressed: onBotaoAcao, // Também abre os detalhes com informações extras
-                  child: const Text(
-                    'Devolvido',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
                 ),
             ],
           ),

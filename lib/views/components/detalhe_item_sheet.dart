@@ -19,18 +19,46 @@ class DetalheItemSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner com Imagem ilustrativa grande
+          // Banner com Imagem (carrega do Supabase Storage se disponível)
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Container(
               width: double.infinity,
-              height: 180,
+              height: 200,
               color: Colors.grey.shade200,
-              child: Icon(
-                Icons.image,
-                size: 80,
-                color: Colors.grey.shade400,
-              ),
+              child: item.imagemUrl != null && item.imagemUrl!.isNotEmpty
+                  ? Image.network(
+                      item.imagemUrl!,
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image_outlined,
+                                size: 48, color: Colors.grey.shade400),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Não foi possível carregar a imagem',
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        );
+                      },
+                    )
+                  : Icon(
+                      Icons.image_outlined,
+                      size: 80,
+                      color: Colors.grey.shade400,
+                    ),
             ),
           ),
           const SizedBox(height: 16),
@@ -71,7 +99,7 @@ class DetalheItemSheet extends StatelessWidget {
           const SizedBox(height: 12),
 
           Text(
-            '• Data de registro: ${item.dataRegistro}',
+            '• Data de registro: ${item.dataRegistroFormatada}',
             style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
           ),
           const SizedBox(height: 4),
@@ -81,51 +109,53 @@ class DetalheItemSheet extends StatelessWidget {
           ),
 
           if (item.foiDevolvido) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
             Text(
-              '• Data de devolução: ${item.dataDevolucao ?? ""}',
+              'Informações de Devolução',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '• Retirado por: ${item.nomeRetirante ?? ""}',
               style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
             ),
             const SizedBox(height: 4),
             Text(
-              '• Retirado por: ${item.nomeRetirante ?? ""}',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A8A),
-              ),
+              '• Data da entrega: ${item.dataDevolucaoFormatada ?? ""}',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
             ),
           ],
 
           const SizedBox(height: 24),
 
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: item.foiDevolvido
-                    ? Colors.grey.shade300
-                    : const Color(0xFF1E3A8A),
-                foregroundColor: item.foiDevolvido
-                    ? Colors.black87
-                    : Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          if (!item.foiDevolvido)
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context); // Fecha o modal de detalhes
+                  onDevolver(); // Abre o modal de devolução
+                },
+                icon: const Icon(Icons.assignment_return, color: Colors.white),
+                label: const Text(
+                  'Registrar Devolução',
+                  style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              onPressed: () {
-                Navigator.pop(context); 
-                if (!item.foiDevolvido) {
-                  onDevolver(); 
-                }
-              },
-              child: Text(
-                item.foiDevolvido ? 'Fechar' : 'Devolver',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
             ),
-          ),
         ],
       ),
     );

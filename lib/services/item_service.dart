@@ -1,7 +1,15 @@
+import 'dart:typed_data';
+import '../core/AcessoDados.dart';
 import '../models/item_model.dart';
+import 'supabase_acesso_dados.dart';
 
 class ItemService {
-  final List<ItemModel> _itens = [];
+  final AcessoDados _acessoDados;
+
+  ItemService({AcessoDados? acessoDados})
+      : _acessoDados = acessoDados ?? SupabaseAcessoDados();
+
+  List<ItemModel> _itens = [];
 
   List<ItemModel> get itensPerdidos {
     return _itens.where((item) => !item.foiDevolvido).toList();
@@ -10,34 +18,37 @@ class ItemService {
   List<ItemModel> get itensDevolvidos {
     return _itens.where((item) => item.foiDevolvido).toList();
   }
-  void adicionarItem({
+
+  Future<void> carregarItens() async {
+    _itens = await _acessoDados.obterTodos();
+  }
+
+  Future<void> adicionarItem({
     required String titulo,
     required String dataRegistro,
     required String local,
-    String? imagemUrl,
-  }) {
+    Uint8List? imagemBytes,
+  }) async {
     final novoItem = ItemModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
       titulo: titulo,
       dataRegistro: dataRegistro,
       local: local,
-      imagemUrl: imagemUrl,
       foiDevolvido: false,
     );
-    _itens.insert(0, novoItem); 
+    await _acessoDados.criar(novoItem, imagemBytes: imagemBytes);
+    await carregarItens();
   }
 
-  void registrarDevolucao({
-    required String itemId,
+  Future<void> registrarDevolucao({
+    required int itemId,
     required String nomeRetirante,
     required String dataDevolucao,
-  }) {
-    final index = _itens.indexWhere((item) => item.id == itemId);
-    if (index != -1) {
-      _itens[index].devolver(
-        retirante: nomeRetirante,
-        data: dataDevolucao,
-      );
-    }
+  }) async {
+    await _acessoDados.devolver(
+      itemId,
+      retirante: nomeRetirante,
+      data: dataDevolucao,
+    );
+    await carregarItens();
   }
 }
