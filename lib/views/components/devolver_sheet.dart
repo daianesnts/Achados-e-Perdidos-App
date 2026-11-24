@@ -45,14 +45,21 @@ class _DevolverSheetState extends State<DevolverSheet> {
   }
 
   Future<void> _selecionarData() async {
+    final hoje = DateTime.now();
     // A data mínima permitida é a data em que o item foi perdido
     final dataMinima = DateTime.parse(widget.item.dataRegistro);
+    // O limite máximo é hoje (evita devolução em data futura)
+    final limiteSuperior = dataMinima.isAfter(hoje) ? dataMinima : hoje;
 
     final DateTime? data = await showDatePicker(
       context: context,
-      initialDate: _dataEscolhida!.isBefore(dataMinima) ? dataMinima : _dataEscolhida!,
+      initialDate: _dataEscolhida != null &&
+              !_dataEscolhida!.isBefore(dataMinima) &&
+              !_dataEscolhida!.isAfter(limiteSuperior)
+          ? _dataEscolhida!
+          : limiteSuperior,
       firstDate: dataMinima,
-      lastDate: DateTime(2030),
+      lastDate: limiteSuperior,
     );
 
     if (data != null) {

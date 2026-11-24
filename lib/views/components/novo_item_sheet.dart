@@ -75,11 +75,14 @@ class _NovoItemSheetState extends State<NovoItemSheet> {
 
   // Abre o seletor de data padrão do Flutter
   Future<void> _selecionarData() async {
+    final hoje = DateTime.now();
     final DateTime? data = await showDatePicker(
       context: context,
-      initialDate: _dataEscolhida ?? DateTime.now(),
+      initialDate: _dataEscolhida != null && !_dataEscolhida!.isAfter(hoje)
+          ? _dataEscolhida!
+          : hoje,
       firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      lastDate: hoje,
     );
 
     if (data != null) {
