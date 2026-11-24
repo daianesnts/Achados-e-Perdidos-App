@@ -136,91 +136,116 @@ class _DevolverSheetState extends State<DevolverSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.assignment_return_outlined,
-                  color: Color(0xFF1E3A8A)),
-              const SizedBox(width: 8),
-              Text(
-                'Devolver: ${widget.item.titulo}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+          _buildHeader(),
           const SizedBox(height: 16),
-
-          const Text('Nome de quem está retirando',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _nomeController,
-            enabled: !_confirmando,
-            decoration: InputDecoration(
-              hintText: 'Ex.: Carlos Eduardo Santos',
-              filled: true,
-              fillColor: Colors.grey.shade100,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
+          _buildCampoRetirante(),
           const SizedBox(height: 14),
-
-          const Text('Data da Devolução',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _dataController,
-            readOnly: true,
-            enabled: !_confirmando,
-            onTap: _confirmando ? null : _selecionarData,
-            decoration: InputDecoration(
-              hintText: 'Ex.: 26/12/2026',
-              filled: true,
-              fillColor: Colors.grey.shade100,
-              suffixIcon: const Icon(Icons.calendar_today_outlined),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
+          _buildCampoDataDevolucao(),
           const SizedBox(height: 20),
+          _buildBotaoConfirmar(),
+        ],
+      ),
+    );
+  }
 
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: _confirmando ? null : _confirmarDevolucao,
-              child: _confirmando
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2.5,
-                      ),
-                    )
-                  : const Text(
-                      'Confirmar Devolução',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        const Icon(Icons.assignment_return_outlined,
+            color: Color(0xFF1E3A8A)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Devolver: ${widget.item.titulo}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCampoRetirante() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Nome de quem está retirando',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _nomeController,
+          enabled: !_confirmando,
+          decoration: InputDecoration(
+            hintText: 'Ex.: Carlos Eduardo Santos',
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCampoDataDevolucao() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Data da Devolução',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _dataController,
+          readOnly: true,
+          enabled: !_confirmando,
+          onTap: _confirmando ? null : _selecionarData,
+          decoration: InputDecoration(
+            hintText: 'Ex.: 26/12/2026',
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            suffixIcon: const Icon(Icons.calendar_today_outlined),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBotaoConfirmar() {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF1E3A8A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: _confirmando ? null : _confirmarDevolucao,
+        child: _confirmando
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : const Text(
+                'Confirmar Devolução',
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }

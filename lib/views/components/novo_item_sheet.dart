@@ -161,163 +161,196 @@ class _NovoItemSheetState extends State<NovoItemSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Registrar novo item perdido',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            _buildTitulo(),
             const SizedBox(height: 18),
-
-            // Área de seleção de foto com preview
-            Center(
-              child: InkWell(
-                onTap: _salvando ? null : _selecionarImagem,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: 110,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (_imagemBytes != null)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.memory(
-                            _imagemBytes!,
-                            width: 110,
-                            height: 110,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      else
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.image_outlined,
-                                size: 44, color: Colors.grey.shade500),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Adicionar foto',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      Positioned(
-                        bottom: 6,
-                        right: 6,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF1E3A8A),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.cloud_upload,
-                              size: 16, color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _buildSeletorFoto(),
             const SizedBox(height: 16),
-
-            const Text('Título', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _tituloController,
-              enabled: !_salvando,
-              decoration: InputDecoration(
-                hintText: 'Ex.: Carregador USB-C',
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+            _buildCampoTitulo(),
             const SizedBox(height: 14),
-
-            const Text('Data', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _dataController,
-              readOnly: true,
-              enabled: !_salvando,
-              onTap: _salvando ? null : _selecionarData,
-              decoration: InputDecoration(
-                hintText: 'Ex.: 26/12/2026',
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                suffixIcon: const Icon(Icons.calendar_today_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+            _buildCampoData(),
             const SizedBox(height: 14),
-
-            const Text('Local', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _localController,
-              enabled: !_salvando,
-              decoration: InputDecoration(
-                hintText: 'Ex.: Sala 106 Bloco D',
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+            _buildCampoLocal(),
             const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E3A8A),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: _salvando ? null : _salvar,
-                child: _salvando
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : const Text(
-                        'Salvar',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ),
+            _buildBotaoSalvar(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTitulo() {
+    return const Text(
+      'Registrar novo item perdido',
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildSeletorFoto() {
+    return Center(
+      child: InkWell(
+        onTap: _salvando ? null : _selecionarImagem,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 110,
+          height: 110,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (_imagemBytes != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.memory(
+                    _imagemBytes!,
+                    width: 110,
+                    height: 110,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              else
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.image_outlined,
+                        size: 44, color: Colors.grey.shade500),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Adicionar foto',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              Positioned(
+                bottom: 6,
+                right: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1E3A8A),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.cloud_upload,
+                      size: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCampoTitulo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Título', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _tituloController,
+          enabled: !_salvando,
+          decoration: InputDecoration(
+            hintText: 'Ex.: Carregador USB-C',
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCampoData() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Data', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _dataController,
+          readOnly: true,
+          enabled: !_salvando,
+          onTap: _salvando ? null : _selecionarData,
+          decoration: InputDecoration(
+            hintText: 'Ex.: 26/12/2026',
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            suffixIcon: const Icon(Icons.calendar_today_outlined),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCampoLocal() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Local', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _localController,
+          enabled: !_salvando,
+          decoration: InputDecoration(
+            hintText: 'Ex.: Sala 106 Bloco D',
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBotaoSalvar() {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF1E3A8A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: _salvando ? null : _salvar,
+        child: _salvando
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : const Text(
+                'Salvar',
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }
