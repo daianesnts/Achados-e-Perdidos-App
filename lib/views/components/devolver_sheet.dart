@@ -45,10 +45,13 @@ class _DevolverSheetState extends State<DevolverSheet> {
   }
 
   Future<void> _selecionarData() async {
+    // A data mínima permitida é a data em que o item foi perdido
+    final dataMinima = DateTime.parse(widget.item.dataRegistro);
+
     final DateTime? data = await showDatePicker(
       context: context,
-      initialDate: _dataEscolhida ?? DateTime.now(),
-      firstDate: DateTime(2020),
+      initialDate: _dataEscolhida!.isBefore(dataMinima) ? dataMinima : _dataEscolhida!,
+      firstDate: dataMinima,
       lastDate: DateTime(2030),
     );
 
